@@ -1,10 +1,10 @@
 <?php
 
-$host = "localhost";
-$user = "root";
-$pass = "";
-$dbname = "ngo_db";
-$port = 3307;
+$host = getenv('DB_HOST') ?: "localhost";
+$user = getenv('DB_USER') ?: "root";
+$pass = getenv('DB_PASS') ?: "";
+$dbname = getenv('DB_NAME') ?: "ngo_db";
+$port = getenv('DB_PORT') ?: 3307;
 
 $conn = mysqli_connect(
     $host,
