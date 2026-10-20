@@ -23,9 +23,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $hashed_password = password_hash($password, PASSWORD_BCRYPT);
 
         // Fixed column targeting to use 'username'
-        $insert_query = "INSERT INTO users (name, username, email, password) VALUES (?, ?, ?, ?)";
+        $insert_query = "INSERT INTO users (name, fullname, username, email, password) VALUES (?, ?, ?, ?, ?)";
         $stmt2 = mysqli_prepare($conn, $insert_query);
-        mysqli_stmt_bind_param($stmt2, "ssss", $username, $username, $email, $hashed_password);
+        mysqli_stmt_bind_param($stmt2, "sssss", $username, $username, $username, $email, $hashed_password);
 
         if (mysqli_stmt_execute($stmt2)) {
             $_SESSION['user_id'] = mysqli_insert_id($conn);
