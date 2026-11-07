@@ -13,14 +13,8 @@ $table_error = false;
 // Changed DESC to ASC so events display from nearest date to farthest date!
 try {
     $query = "SELECT * FROM events ORDER BY date ASC";
-    $result = mysqli_query($conn, $query);
-    
-    if ($result) {
-        while ($row = mysqli_fetch_assoc($result)) {
-            $events[] = $row;
-        }
-    }
-} catch (mysqli_sql_exception $e) {
+    $events = $conn->query($query)->fetchAll();
+} catch (PDOException $e) {
     $table_error = true; 
 }
 ?>
@@ -75,4 +69,4 @@ try {
         </table>
     </div>
 </body>
-</html>
+</html>

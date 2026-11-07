@@ -13,8 +13,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // --- ADD NEW ARTICLE ---
     if ($action === 'add') {
-        $title = mysqli_real_escape_string($conn, $_POST['title']);
-        $date = mysqli_real_escape_string($conn, $_POST['article_date']);
+        $title = $_POST['title'];
+        $date = $_POST['article_date'];
         
         // FIX HERE: Grab the raw text instead of running it through real_escape_string
         $summary = $_POST['summary']; 
@@ -39,10 +39,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         $query = "INSERT INTO news_articles (title, summary, image_path, article_date) VALUES (?, ?, ?, ?)";
-        $stmt = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, "ssss", $title, $summary, $image_path, $date);
+        $stmt = $conn->prepare($query);
 
-        if (mysqli_stmt_execute($stmt)) {
+        if ($stmt->execute([$title, $summary, $image_path, $date])) {
             header("Location: admin-news.php?status=success");
         } else {
             header("Location: admin-news.php?error=Database Error");
@@ -56,10 +55,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $image_to_delete = "../" . $_POST['image_path'];
 
         $query = "DELETE FROM news_articles WHERE id = ?";
-        $stmt = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, "i", $id);
+        $stmt = $conn->prepare($query);
 
-        if (mysqli_stmt_execute($stmt)) {
+        if ($stmt->execute([$id])) {
             // Server space management: delete the actual image file
             if (file_exists($image_to_delete) && !empty($_POST['image_path'])) {
                 unlink($image_to_delete);
@@ -74,4 +72,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     header("Location: admin-news.php");
     exit();
 }
-?>
+?>

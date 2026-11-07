@@ -21,10 +21,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // 1. Handle Deletion
     if (isset($_POST['delete_user'])) {
         $delete_query = "DELETE FROM users WHERE id = ?";
-        $stmt = mysqli_prepare($conn, $delete_query);
-        mysqli_stmt_bind_param($stmt, "i", $id);
+        $stmt = $conn->prepare($delete_query);
 
-        if (mysqli_stmt_execute($stmt)) {
+        if ($stmt->execute([$id])) {
             header("Location: admin-users.php?msg=deleted");
             exit();
         } else {
@@ -33,15 +32,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } 
     // 2. Handle Updates
     elseif (isset($_POST['update_user'])) {
-        $fullname = mysqli_real_escape_string($conn, $_POST['fullname']);
-        $email = mysqli_real_escape_string($conn, $_POST['email']);
-        $role = mysqli_real_escape_string($conn, $_POST['role']);
+        $fullname = $_POST['fullname'];
+        $email = $_POST['email'];
+        $role = $_POST['role'];
 
         $update_query = "UPDATE users SET fullname = ?, email = ?, role = ? WHERE id = ?";
-        $stmt = mysqli_prepare($conn, $update_query);
-        mysqli_stmt_bind_param($stmt, "sssi", $fullname, $email, $role, $id);
+        $stmt = $conn->prepare($update_query);
 
-        if (mysqli_stmt_execute($stmt)) {
+        if ($stmt->execute([$fullname, $email, $role, $id])) {
             $success = "User account updated successfully!";
         } else {
             $error = "Failed to update user.";
@@ -50,11 +48,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 
 $query = "SELECT * FROM users WHERE id = ?";
-$stmt = mysqli_prepare($conn, $query);
-mysqli_stmt_bind_param($stmt, "i", $id);
-mysqli_stmt_execute($stmt);
-$result = mysqli_stmt_get_result($stmt);
-$user = mysqli_fetch_assoc($result);
+$stmt = $conn->prepare($query);
+$stmt->execute([$id]);
+$user = $stmt->fetch();
 
 if (!$user) {
     die("User not found in the database.");
@@ -150,4 +146,4 @@ if (!$user) {
     </script>
 
 </body>
-</html>
+</html>

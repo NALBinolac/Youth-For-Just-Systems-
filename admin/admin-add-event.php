@@ -28,10 +28,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Insert the new event with ALL columns
     $insert_query = "INSERT INTO events (title, date, time_range, venue, category, description) VALUES (?, ?, ?, ?, ?, ?)";
-    $stmt = mysqli_prepare($conn, $insert_query);
-    mysqli_stmt_bind_param($stmt, "ssssss", $title, $date, $time_range, $venue, $category, $description);
+    $stmt = $conn->prepare($insert_query);
 
-    if (mysqli_stmt_execute($stmt)) {
+    if ($stmt->execute([$title, $date, $time_range, $venue, $category, $description])) {
         $success = "New event successfully added to the schedule!";
     } else {
         $error = "Failed to add event. Make sure your database structure is updated.";
@@ -146,4 +145,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         });
     </script>
 </body>
-</html>
+</html>

@@ -34,10 +34,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Update query with all 6 columns
     $update_query = "UPDATE events SET title = ?, date = ?, time_range = ?, venue = ?, category = ?, description = ? WHERE id = ?";
-    $stmt = mysqli_prepare($conn, $update_query);
-    mysqli_stmt_bind_param($stmt, "ssssssi", $title, $date, $time_range, $venue, $category, $description, $id);
+    $stmt = $conn->prepare($update_query);
 
-    if (mysqli_stmt_execute($stmt)) {
+    if ($stmt->execute([$title, $date, $time_range, $venue, $category, $description, $id])) {
         $success = "Event details updated successfully!";
     } else {
         $error = "Failed to update event.";
@@ -46,11 +45,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 // Fetch Current Event Data
 $query = "SELECT * FROM events WHERE id = ?";
-$stmt = mysqli_prepare($conn, $query);
-mysqli_stmt_bind_param($stmt, "i", $id);
-mysqli_stmt_execute($stmt);
-$result = mysqli_stmt_get_result($stmt);
-$event = mysqli_fetch_assoc($result);
+$stmt = $conn->prepare($query);
+$stmt->execute([$id]);
+$event = $stmt->fetch();
 
 if (!$event) {
     die("Event not found in the database.");
@@ -190,4 +187,4 @@ if (!empty($event['time_range']) && strpos($event['time_range'], ' - ') !== fals
     </script>
 
 </body>
-</html>
+</html>

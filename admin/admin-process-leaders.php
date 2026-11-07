@@ -12,8 +12,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // --- ADD LEADER ---
     if ($action === 'add') {
-        $name = mysqli_real_escape_string($conn, $_POST['name']);
-        $role = mysqli_real_escape_string($conn, $_POST['role']);
+        $name = $_POST['name'];
+        $role = $_POST['role'];
         $bio = $_POST['bio'];
         $image_path = "";
 
@@ -33,10 +33,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         $query = "INSERT INTO leaders (name, role, bio, image_path) VALUES (?, ?, ?, ?)";
-        $stmt = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, "ssss", $name, $role, $bio, $image_path);
+        $stmt = $conn->prepare($query);
 
-        if (mysqli_stmt_execute($stmt)) {
+        if ($stmt->execute([$name, $role, $bio, $image_path])) {
             header("Location: admin-leaders.php?status=success");
         } else {
             header("Location: admin-leaders.php?error=Database Error");
@@ -50,10 +49,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $image_to_delete = "../" . $_POST['image_path'];
 
         $query = "DELETE FROM leaders WHERE id = ?";
-        $stmt = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, "i", $id);
+        $stmt = $conn->prepare($query);
 
-        if (mysqli_stmt_execute($stmt)) {
+        if ($stmt->execute([$id])) {
             if (file_exists($image_to_delete) && !empty($_POST['image_path'])) {
                 unlink($image_to_delete);
             }
@@ -62,4 +60,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 }
-?>
+?>

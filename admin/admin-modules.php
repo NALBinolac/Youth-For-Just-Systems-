@@ -19,11 +19,10 @@ if (isset($_GET['edit'])) {
     $is_editing = true;
     $edit_id = intval($_GET['edit']);
     
-    $edit_query = "SELECT * FROM modules WHERE module_number = $edit_id LIMIT 1";
-    $edit_result = mysqli_query($conn, $edit_query);
+    $edit_stmt = $conn->prepare("SELECT * FROM modules WHERE module_number = ? LIMIT 1");
+    $edit_stmt->execute([$edit_id]);
     
-    if ($edit_result && mysqli_num_rows($edit_result) > 0) {
-        $edit_row = mysqli_fetch_assoc($edit_result);
+    if ($edit_row = $edit_stmt->fetch()) {
         $edit_module_number = $edit_row['module_number'];
         $edit_title = $edit_row['title'];
         $edit_type = $edit_row['type'];
@@ -35,10 +34,10 @@ $submissions_query = "SELECT s.*, u.username AS student_name
                       FROM submissions s 
                       LEFT JOIN users u ON s.user_id = u.id 
                       ORDER BY s.submitted_at DESC";
-$submissions_result = mysqli_query($conn, $submissions_query);
+$submissions_list = $conn->query($submissions_query)->fetchAll();
 
 $modules_query = "SELECT * FROM modules ORDER BY module_number ASC";
-$modules_result = mysqli_query($conn, $modules_query);
+$modules_list = $conn->query($modules_query)->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -129,9 +128,9 @@ $modules_result = mysqli_query($conn, $modules_query);
             <div class="inventory-section" style="margin-top: 0; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #eaeaea;">
                 <h3 style="color: #2e7d32; border-bottom: 2px solid #2e7d32; padding-bottom: 12px; margin-top:0;">Active Modules Inventory</h3>
                 
-                <?php if ($modules_result && mysqli_num_rows($modules_result) > 0): ?>
+                <?php if (!empty($modules_list)): ?>
                     <div style="max-height: 500px; overflow-y: auto; padding-right: 10px; margin-top: 15px;">
-                    <?php while($mod = mysqli_fetch_assoc($modules_result)): ?>
+                    <?php foreach ($modules_list as $mod): ?>
                         <div class="inventory-item" style="padding: 20px 0;">
                             <div class="inventory-meta">
                                 <h5 style="font-size: 1.05rem; margin-bottom: 4px;">M<?php echo htmlspecialchars($mod['module_number']); ?>: <?php echo htmlspecialchars($mod['title']); ?></h5>
@@ -142,7 +141,7 @@ $modules_result = mysqli_query($conn, $modules_query);
                                 <a href="javascript:void(0);" onclick="confirmDelete(<?php echo $mod['module_number']; ?>)" class="btn-delete">Delete</a>
                             </div>
                         </div>
-                    <?php endwhile; ?>
+                    <?php endforeach; ?>
                     </div>
                 <?php else: ?>
                     <div style="text-align: center; padding: 40px; color: #888;">Walang idinagdag na module sa imbentaryo.</div>
@@ -155,8 +154,8 @@ $modules_result = mysqli_query($conn, $modules_query);
                 <p style="font-size: 0.85rem; color: #666666; margin-bottom: 20px;">Recent assignments submitted by enrolled users.</p>
                 
                 <div style="max-height: 500px; overflow-y: auto; padding-right: 5px;">
-                    <?php if ($submissions_result && mysqli_num_rows($submissions_result) > 0): ?>
-                        <?php while($sub = mysqli_fetch_assoc($submissions_result)): 
+                    <?php if (!empty($submissions_list)): ?>
+                        <?php foreach ($submissions_list as $sub): 
                             $file_names = json_decode($sub['file_name'], true) ?: [$sub['file_name']];
                             $file_paths = json_decode($sub['file_path'], true) ?: [$sub['file_path']];
                             $display_name = !empty($file_names) ? $file_names[0] : 'View Submission';
@@ -177,7 +176,7 @@ $modules_result = mysqli_query($conn, $modules_query);
                                     <a href="<?php echo htmlspecialchars($download_link); ?>" class="btn-download" download>Download</a>
                                 </div>
                             </div>
-                        <?php endwhile; ?>
+                        <?php endforeach; ?>
                     <?php else: ?>
                         <div style="text-align: center; color: #999999; padding: 40px; border: 1px dashed #dddddd; border-radius: 4px;">No recent submissions found.</div>
                     <?php endif; ?>
@@ -324,4 +323,4 @@ $modules_result = mysqli_query($conn, $modules_query);
     </script>
 
 </body>
-</html>
+</html>

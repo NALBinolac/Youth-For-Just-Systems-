@@ -10,13 +10,8 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
 // Fallback empty tracker data array if specific tables haven't been compiled yet
 $donations = [];
 try {
-    $result = mysqli_query($conn, "SELECT * FROM donations ORDER BY id DESC");
-    if ($result) {
-        while ($row = mysqli_fetch_assoc($result)) {
-            $donations[] = $row;
-        }
-    }
-} catch (mysqli_sql_exception $e) { }
+    $donations = $conn->query("SELECT * FROM donations ORDER BY id DESC")->fetchAll();
+} catch (PDOException $e) { }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -81,4 +76,4 @@ try {
     </div>
 
 </body>
-</html>
+</html>

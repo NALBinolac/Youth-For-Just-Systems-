@@ -24,12 +24,9 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
 
     // Fetch current volunteer information
     $query = "SELECT fullname, email, status FROM volunteers WHERE id = ?";
-    $stmt = mysqli_prepare($conn, $query);
-    mysqli_stmt_bind_param($stmt, "i", $id);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-    $volunteer = mysqli_fetch_assoc($result);
-    mysqli_stmt_close($stmt);
+    $stmt = $conn->prepare($query);
+    $stmt->execute([$id]);
+    $volunteer = $stmt->fetch();
 
     if (!$volunteer) {
         die("Volunteer not found.");
@@ -42,10 +39,8 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
     if ($action === 'approve') {
         $new_status = 'Approved';
         $query = "UPDATE volunteers SET status = ?, status_updated_at = NOW(), status_notified = 0 WHERE id = ?";
-        $stmt = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, "si", $new_status, $id);
-        $update_success = mysqli_stmt_execute($stmt);
-        mysqli_stmt_close($stmt);
+        $stmt = $conn->prepare($query);
+        $update_success = $stmt->execute([$new_status, $id]);
 
         if ($update_success) {
             $email_sent = sendVolunteerStatusEmail($volunteer_email, $volunteer_name, 'Approved', '', $admin_notes);
@@ -54,10 +49,8 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
             // logVolunteerStatusChange($conn, $id, $previous_status, $new_status, $email_sent, $admin_notes);
 
             if ($email_sent) {
-                $update_stmt = mysqli_prepare($conn, "UPDATE volunteers SET status_notified = 1 WHERE id = ?");
-                mysqli_stmt_bind_param($update_stmt, "i", $id);
-                mysqli_stmt_execute($update_stmt);
-                mysqli_stmt_close($update_stmt);
+                $update_stmt = $conn->prepare("UPDATE volunteers SET status_notified = 1 WHERE id = ?");
+                $update_stmt->execute([$id]);
             }
         }
 
@@ -66,10 +59,8 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
     } elseif ($action === 'reject') {
         $new_status = 'Rejected';
         $query = "UPDATE volunteers SET status = ?, rejection_reason = ?, status_updated_at = NOW(), status_notified = 0 WHERE id = ?";
-        $stmt = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, "ssi", $new_status, $rejection_reason, $id);
-        $update_success = mysqli_stmt_execute($stmt);
-        mysqli_stmt_close($stmt);
+        $stmt = $conn->prepare($query);
+        $update_success = $stmt->execute([$new_status, $rejection_reason, $id]);
 
         if ($update_success) {
             $email_sent = sendVolunteerStatusEmail($volunteer_email, $volunteer_name, 'Rejected', $rejection_reason, $admin_notes);
@@ -78,20 +69,16 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
             // logVolunteerStatusChange($conn, $id, $previous_status, $new_status, $email_sent, $admin_notes);
 
             if ($email_sent) {
-                $update_stmt = mysqli_prepare($conn, "UPDATE volunteers SET status_notified = 1 WHERE id = ?");
-                mysqli_stmt_bind_param($update_stmt, "i", $id);
-                mysqli_stmt_execute($update_stmt);
-                mysqli_stmt_close($update_stmt);
+                $update_stmt = $conn->prepare("UPDATE volunteers SET status_notified = 1 WHERE id = ?");
+                $update_stmt->execute([$id]);
             }
         }
 
         $success_message = "Volunteer rejected." . ($email_sent ? " Email notification sent." : " Email notification failed.");
 
     } elseif ($action === 'delete') {
-        $stmt = mysqli_prepare($conn, "DELETE FROM volunteers WHERE id = ?");
-        mysqli_stmt_bind_param($stmt, "i", $id);
-        mysqli_stmt_execute($stmt);
-        mysqli_stmt_close($stmt);
+        $stmt = $conn->prepare("DELETE FROM volunteers WHERE id = ?");
+        $stmt->execute([$id]);
 
         $success_message = "Volunteer record deleted.";
     }
@@ -99,4 +86,4 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
 
 header("Location: admin-volunteers.php?success=" . urlencode($success_message));
 exit();
-?>
+?>

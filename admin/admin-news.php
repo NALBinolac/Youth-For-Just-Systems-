@@ -11,12 +11,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
 // Fetch existing articles
 $articles = [];
 $query = "SELECT * FROM news_articles ORDER BY article_date DESC, created_at DESC";
-$result = mysqli_query($conn, $query);
-if ($result) {
-    while ($row = mysqli_fetch_assoc($result)) {
-        $articles[] = $row;
-    }
-}
+$articles = $conn->query($query)->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -128,4 +123,4 @@ if ($result) {
     </script>
 
 </body>
-</html>
+</html>

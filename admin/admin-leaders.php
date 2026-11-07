@@ -20,11 +20,10 @@ if (isset($_GET['edit'])) {
     $is_editing = true;
     $edit_id = intval($_GET['edit']);
     
-    $edit_query = "SELECT * FROM leaders WHERE id = $edit_id LIMIT 1";
-    $edit_result = mysqli_query($conn, $edit_query);
+    $edit_stmt = $conn->prepare("SELECT * FROM leaders WHERE id = ? LIMIT 1");
+    $edit_stmt->execute([$edit_id]);
     
-    if ($edit_result && mysqli_num_rows($edit_result) > 0) {
-        $edit_row = mysqli_fetch_assoc($edit_result);
+    if ($edit_row = $edit_stmt->fetch()) {
         $edit_name = $edit_row['name'];
         $edit_role = $edit_row['role'];
         $edit_bio = $edit_row['bio'];
@@ -34,12 +33,7 @@ if (isset($_GET['edit'])) {
 
 $leaders = [];
 $query = "SELECT * FROM leaders ORDER BY id ASC";
-$result = mysqli_query($conn, $query);
-if ($result) {
-    while ($row = mysqli_fetch_assoc($result)) {
-        $leaders[] = $row;
-    }
-}
+$leaders = $conn->query($query)->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -199,4 +193,4 @@ if ($result) {
     </script>
 
 </body>
-</html>
+</html>

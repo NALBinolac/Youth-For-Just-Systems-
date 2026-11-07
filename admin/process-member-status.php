@@ -26,12 +26,9 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
 
     // Fetch current member information (targeting memberships table)
     $query = "SELECT fullname, email, status FROM memberships WHERE id = ?";    
-    $stmt = mysqli_prepare($conn, $query);
-    mysqli_stmt_bind_param($stmt, "i", $id);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-    $member = mysqli_fetch_assoc($result);
-    mysqli_stmt_close($stmt);
+    $stmt = $conn->prepare($query);
+    $stmt->execute([$id]);
+    $member = $stmt->fetch();
 
     if (!$member) {
         die("Membership application not found.");
@@ -45,10 +42,8 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
         $new_status = 'Approved';
         
         $query = "UPDATE memberships SET status = ? WHERE id = ?";
-        $stmt = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, "si", $new_status, $id);
-        $update_success = mysqli_stmt_execute($stmt);
-        mysqli_stmt_close($stmt);
+        $stmt = $conn->prepare($query);
+        $update_success = $stmt->execute([$new_status, $id]);
 
         if ($update_success) {
             // Calls the new member-specific email function
@@ -61,10 +56,8 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
         $new_status = 'Rejected';
         
         $query = "UPDATE memberships SET status = ?, rejection_reason = ? WHERE id = ?";
-        $stmt = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, "ssi", $new_status, $rejection_reason, $id);
-        $update_success = mysqli_stmt_execute($stmt);
-        mysqli_stmt_close($stmt);
+        $stmt = $conn->prepare($query);
+        $update_success = $stmt->execute([$new_status, $rejection_reason, $id]);
 
         if ($update_success) {
             // Calls the new member-specific email function with the reason
@@ -74,10 +67,8 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
         $success_message = "Membership rejected." . ($email_sent ? " Email notification sent." : " Email notification failed.");
 
     } elseif ($action === 'delete') {
-        $stmt = mysqli_prepare($conn, "DELETE FROM memberships WHERE id = ?");
-        mysqli_stmt_bind_param($stmt, "i", $id);
-        mysqli_stmt_execute($stmt);
-        mysqli_stmt_close($stmt);
+        $stmt = $conn->prepare("DELETE FROM memberships WHERE id = ?");
+        $stmt->execute([$id]);
 
         $success_message = "Membership record deleted.";
     }
@@ -86,4 +77,4 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
 // Redirect back to the admin members page
 header("Location: admin-members.php?success=" . urlencode($success_message));
 exit();
-?>
+?>

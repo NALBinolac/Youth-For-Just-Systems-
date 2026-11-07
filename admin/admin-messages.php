@@ -8,7 +8,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
 }
 
 $query = "SELECT * FROM contact_messages ORDER BY created_at DESC";
-$result = $conn->query($query);
+$messages_list = $conn->query($query)->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -38,8 +38,8 @@ $result = $conn->query($query);
                 </tr>
             </thead>
             <tbody>
-                <?php if ($result && $result->num_rows > 0): ?>
-                    <?php while($row = $result->fetch_assoc()): ?>
+                <?php if (!empty($messages_list)): ?>
+                    <?php foreach ($messages_list as $row): ?>
                         <tr>
                             <td><?php echo date('M d, Y', strtotime($row['created_at'])); ?></td>
                             <td><strong><?php echo htmlspecialchars($row['name']); ?></strong></td>
@@ -56,7 +56,7 @@ $result = $conn->query($query);
                                 )">View</button>
                             </td>
                         </tr>
-                    <?php endwhile; ?>
+                    <?php endforeach; ?>
                 <?php else: ?>
                     <tr><td colspan="6" style="text-align:center;">Walang mensaheng natanggap.</td></tr>
                 <?php endif; ?>
@@ -123,4 +123,4 @@ document.getElementById('messageModal').addEventListener('click', function(e) {
 </script>
 
 </body>
-</html>
+</html>

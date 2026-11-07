@@ -5,16 +5,14 @@ include '../config.php';
 $error = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $email = mysqli_real_escape_string($conn, $_POST['email']);
+    $email = $_POST['email'];
     $password_input = $_POST['password'];
 
     $query = "SELECT * FROM users WHERE email = ? AND role = 'admin'";
-    $stmt = mysqli_prepare($conn, $query);
-    mysqli_stmt_bind_param($stmt, "s", $email);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
+    $stmt = $conn->prepare($query);
+    $stmt->execute([$email]);
 
-    if ($user = mysqli_fetch_assoc($result)) {
+    if ($user = $stmt->fetch()) {
         if (password_verify($password_input, $user['password'])) {
             $_SESSION['admin_logged_in'] = true;
             $_SESSION['role'] = $user['role'];
@@ -70,4 +68,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </section>
 
 </body>
-</html>
+</html>

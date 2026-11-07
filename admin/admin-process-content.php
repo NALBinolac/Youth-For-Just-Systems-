@@ -9,8 +9,8 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $section = mysqli_real_escape_string($conn, $_POST['section_name']);
-    $content = mysqli_real_escape_string($conn, $_POST['content_text']);
+    $section = $_POST['section_name'];
+    $content = $_POST['content_text'];
     $image_path = null;
 
     // 1. Handle the Media Upload (if the admin attached a photo)
@@ -32,23 +32,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    // 2. Save to Database using ON DUPLICATE KEY UPDATE
+    // 2. Save to Database (insert, or update if the section already exists)
     if ($image_path) {
         // If they uploaded a new image, update both text and image
         $query = "INSERT INTO site_content (section_name, content_text, image_path) VALUES (?, ?, ?) 
-                  ON DUPLICATE KEY UPDATE content_text = ?, image_path = ?";
-        $stmt = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, "sssss", $section, $content, $image_path, $content, $image_path);
+                  ON CONFLICT (section_name) DO UPDATE SET content_text = EXCLUDED.content_text, image_path = EXCLUDED.image_path";
+        $params = [$section, $content, $image_path];
     } else {
         // If no image was uploaded, ONLY update the text
         $query = "INSERT INTO site_content (section_name, content_text) VALUES (?, ?) 
-                  ON DUPLICATE KEY UPDATE content_text = ?";
-        $stmt = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, "sss", $section, $content, $content);
+                  ON CONFLICT (section_name) DO UPDATE SET content_text = EXCLUDED.content_text";
+        $params = [$section, $content];
     }
 
     // 3. Execute and Redirect
-    if (mysqli_stmt_execute($stmt)) {
+    $stmt = $conn->prepare($query);
+    if ($stmt->execute($params)) {
         header("Location: admin-programs.php?status=success");
         exit();
     } else {
@@ -59,4 +58,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     header("Location: admin-programs.php");
     exit();
 }
-?>
+?>

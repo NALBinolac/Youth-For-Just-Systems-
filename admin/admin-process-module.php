@@ -29,17 +29,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['module_pdf'])) {
         }
 
         $module_number = intval($module_numbers[$i]);
-        $title = mysqli_real_escape_string($conn, $titles[$i]);
-        $type = mysqli_real_escape_string($conn, $types[$i]);
+        $title = $titles[$i];
+        $type = $types[$i];
 
         // If a module with this number already exists, delete its old file
         $check_query = "SELECT file_path FROM modules WHERE module_number = ?";
-        $check_stmt = mysqli_prepare($conn, $check_query);
-        mysqli_stmt_bind_param($check_stmt, "i", $module_number);
-        mysqli_stmt_execute($check_stmt);
-        $check_result = mysqli_stmt_get_result($check_stmt);
+        $check_stmt = $conn->prepare($check_query);
+        $check_stmt->execute([$module_number]);
 
-        if ($old_row = mysqli_fetch_assoc($check_result)) {
+        if ($old_row = $check_stmt->fetch()) {
             $old_disk_path = "../" . $old_row['file_path'];
             if (file_exists($old_disk_path)) {
                 unlink($old_disk_path);
@@ -53,12 +51,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['module_pdf'])) {
 
         if (move_uploaded_file($file_tmp, $destination)) {
             $query = "INSERT INTO modules (module_number, title, type, file_path) VALUES (?, ?, ?, ?)
-                      ON DUPLICATE KEY UPDATE title = ?, type = ?, file_path = ?";
+                      ON CONFLICT (module_number) DO UPDATE SET title = EXCLUDED.title, type = EXCLUDED.type,
+                      file_path = EXCLUDED.file_path, updated_at = CURRENT_TIMESTAMP";
 
-            $stmt = mysqli_prepare($conn, $query);
-            mysqli_stmt_bind_param($stmt, "issssss", $module_number, $title, $type, $db_filepath, $title, $type, $db_filepath);
+            $stmt = $conn->prepare($query);
 
-            if (mysqli_stmt_execute($stmt)) {
+            if ($stmt->execute([$module_number, $title, $type, $db_filepath])) {
                 $success_count++;
             } else {
                 $errors[] = "Module #" . $module_number . ": database error.";
@@ -82,4 +80,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['module_pdf'])) {
 } else {
     die("No file detected. Please try again.");
 }
-?>
+?>

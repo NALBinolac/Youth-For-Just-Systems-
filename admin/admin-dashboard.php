@@ -15,18 +15,14 @@ $event_count = 0;
 $module_count = 0;
 
 try {
-    $res = mysqli_query($conn, "SELECT COUNT(*) as total FROM users");
-    if($res) $user_count = mysqli_fetch_assoc($res)['total'];
+    $user_count = $conn->query("SELECT COUNT(*) as total FROM users")->fetchColumn();
 
-    $res = mysqli_query($conn, "SELECT COUNT(*) as total FROM volunteers");
-    if($res) $volunteer_count = mysqli_fetch_assoc($res)['total'];
+    $volunteer_count = $conn->query("SELECT COUNT(*) as total FROM volunteers")->fetchColumn();
 
-    $res = mysqli_query($conn, "SELECT COUNT(*) as total FROM events");
-    if($res) $event_count = mysqli_fetch_assoc($res)['total'];
+    $event_count = $conn->query("SELECT COUNT(*) as total FROM events")->fetchColumn();
 
-    $res = mysqli_query($conn, "SELECT COUNT(*) as total FROM modules");
-    if($res) $module_count = mysqli_fetch_assoc($res)['total'];
-} catch (mysqli_sql_exception $e) {
+    $module_count = $conn->query("SELECT COUNT(*) as total FROM modules")->fetchColumn();
+} catch (PDOException $e) {
     // Suppress missing tables until created in phpMyAdmin
 }
 ?>
@@ -72,4 +68,4 @@ try {
     </div>
 
 </body>
-</html>
+</html>

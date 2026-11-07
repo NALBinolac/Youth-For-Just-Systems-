@@ -8,12 +8,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
 }
 
 $volunteers = [];
-$result = mysqli_query($conn, "SELECT * FROM volunteers ORDER BY id DESC");
-if ($result) {
-    while ($row = mysqli_fetch_assoc($result)) {
-        $volunteers[] = $row;
-    }
-}
+$volunteers = $conn->query("SELECT * FROM volunteers ORDER BY id DESC")->fetchAll();
 
 $success_message = isset($_GET['success']) ? $_GET['success'] : '';
 
@@ -191,4 +186,4 @@ function statusBadge($status) {
     </script>
 
 </body>
-</html>
+</html>

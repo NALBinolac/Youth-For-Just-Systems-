@@ -10,7 +10,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
 
 // Fetch all users using MySQLi
 $query = "SELECT id, username, fullname, email, role, created_at FROM users ORDER BY created_at DESC";
-$result = mysqli_query($conn, $query);
+$users_list = $conn->query($query)->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -42,8 +42,8 @@ $result = mysqli_query($conn, $query);
                 </tr>
             </thead>
          <tbody>
-                <?php if ($result && mysqli_num_rows($result) > 0): ?>
-                    <?php while ($user = mysqli_fetch_assoc($result)): ?>
+                <?php if (!empty($users_list)): ?>
+                    <?php foreach ($users_list as $user): ?>
                     <tr>
                         <td><?= htmlspecialchars($user['id']) ?></td>
                         <td><?= htmlspecialchars($user['username']) ?></td>
@@ -54,7 +54,7 @@ $result = mysqli_query($conn, $query);
                             <a href="admin-edit-user.php?id=<?= $user['id'] ?>" class="btn-edit">Edit</a>
                         </td>
                     </tr>
-                    <?php endwhile; ?>
+                    <?php endforeach; ?>
                 <?php else: ?>
                     <tr><td colspan="6" style="text-align: center; color: #888; padding: 30px;">No registered users found.</td></tr>
                 <?php endif; ?>
@@ -63,4 +63,4 @@ $result = mysqli_query($conn, $query);
     </div>
 
 </body>
-</html>
+</html>
