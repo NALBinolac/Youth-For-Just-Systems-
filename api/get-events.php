@@ -5,10 +5,10 @@ header('Cache-Control: no-cache, no-store, must-revalidate');
 require_once '../config.php';
 
 $events = [];
-$result = mysqli_query($conn, "SELECT * FROM events ORDER BY date ASC");
+$rows = $conn->query("SELECT * FROM events ORDER BY date ASC")->fetchAll();
 
-if ($result && mysqli_num_rows($result) > 0) {
-    while ($row = mysqli_fetch_assoc($result)) {
+if (!empty($rows)) {
+    foreach ($rows as $row) {
 
         $colorMap = [
             'Workshop'   => '#2E7D32',
@@ -31,4 +31,4 @@ if ($result && mysqli_num_rows($result) > 0) {
     }
 }
 
-echo json_encode($events);
+echo json_encode($events);
