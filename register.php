@@ -16,14 +16,17 @@ if(isset($_POST['register'])){
     "INSERT INTO users
     (fullname,email,password)
     VALUES
-    ('$fullname','$email','$password')";
+    (?, ?, ?)";
 
-    if(mysqli_query($conn,$sql)){
+    try {
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$fullname, $email, $password]);
 
         header("Location: login.php");
         exit();
 
-    }else{
+    } catch (PDOException $e) {
 
         echo "Registration Failed";
 
@@ -91,4 +94,4 @@ Register
 
 </body>
 
-</html>
+</html>

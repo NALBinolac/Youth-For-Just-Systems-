@@ -5,30 +5,27 @@ include 'config.php';
 $error = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = mysqli_real_escape_string($conn, $_POST['username']);
-    $email = mysqli_real_escape_string($conn, $_POST['email']);
+    $username = trim($_POST['username']);
+    $email = trim($_POST['email']);
     $password = $_POST['password'];
 
     // Check if email already exists
     $check_query = "SELECT id FROM users WHERE email = ?";
-    $stmt = mysqli_prepare($conn, $check_query);
-    mysqli_stmt_bind_param($stmt, "s", $email);
-    mysqli_stmt_execute($stmt);
-    mysqli_stmt_store_result($stmt);
+    $stmt = $conn->prepare($check_query);
+    $stmt->execute([$email]);
 
-    if (mysqli_stmt_num_rows($stmt) > 0) {
+    if ($stmt->fetch()) {
         $error = "This email is already registered.";
     } else {
         // Hash the password safely
         $hashed_password = password_hash($password, PASSWORD_BCRYPT);
 
         // Fixed column targeting to use 'username'
-        $insert_query = "INSERT INTO users (name, fullname, username, email, password) VALUES (?, ?, ?, ?, ?)";
-        $stmt2 = mysqli_prepare($conn, $insert_query);
-        mysqli_stmt_bind_param($stmt2, "sssss", $username, $username, $username, $email, $hashed_password);
+        $insert_query = "INSERT INTO users (name, fullname, username, email, password) VALUES (?, ?, ?, ?, ?) RETURNING id";
+        $stmt2 = $conn->prepare($insert_query);
 
-        if (mysqli_stmt_execute($stmt2)) {
-            $_SESSION['user_id'] = mysqli_insert_id($conn);
+        if ($stmt2->execute([$username, $username, $username, $email, $hashed_password])) {
+            $_SESSION['user_id'] = $stmt2->fetchColumn();
             $_SESSION['user_name'] = $username;
             $_SESSION['role'] = 'student';
 

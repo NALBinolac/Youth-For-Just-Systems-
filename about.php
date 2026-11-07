@@ -8,12 +8,7 @@ $impactData = getSectionContent('about_impact', $conn);
 // Fetch the Leadership roster
 $leaders = [];
 $leaderQuery = "SELECT * FROM leaders ORDER BY id ASC";
-$leaderResult = mysqli_query($conn, $leaderQuery);
-if ($leaderResult) {
-    while ($row = mysqli_fetch_assoc($leaderResult)) {
-        $leaders[] = $row;
-    }
-}
+$leaders = $conn->query($leaderQuery)->fetchAll();
 ?>
 
 <!DOCTYPE html>
@@ -253,4 +248,4 @@ if ($leaderResult) {
 <script src="js/counter.js"></script>
 
 </body>
-</html>
+</html>

@@ -5,17 +5,15 @@ include 'config.php';
 $error = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $email = mysqli_real_escape_string($conn, $_POST['email']);
+    $email = trim($_POST['email']);
     $password = $_POST['password'];
 
     // Query the users table
     $query = "SELECT * FROM users WHERE email = ?";
-    $stmt = mysqli_prepare($conn, $query);
-    mysqli_stmt_bind_param($stmt, "s", $email);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
+    $stmt = $conn->prepare($query);
+    $stmt->execute([$email]);
 
-    if ($user = mysqli_fetch_assoc($result)) {
+    if ($user = $stmt->fetch()) {
         // Verify password
         if (password_verify($password, $user['password'])) {
             // Set session variables
@@ -91,4 +89,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <?php include 'includes/footer.php'; ?>
 
 </body>
-</html>
+</html>

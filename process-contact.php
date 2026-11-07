@@ -19,14 +19,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $sql = "INSERT INTO contact_messages (name, email, subject, message, status, created_at) VALUES (?, ?, ?, ?, 'unread', NOW())";
         
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ssss", $name, $email, $subject, $message);
 
-        if ($stmt->execute()) {
+        if ($stmt->execute([$name, $email, $subject, $message])) {
             header("Location: about.php?status=success#contact");
         } else {
             throw new Exception("Failed to save message.");
         }
-        $stmt->close();
 
     } catch (Exception $e) {
         header("Location: about.php?status=error&msg=Database error occurred.#contact");
@@ -35,5 +33,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 } else {
     header("Location: about.php");
 }
-$conn->close();
-?>
+?>

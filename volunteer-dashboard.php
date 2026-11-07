@@ -25,19 +25,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'])) {
     } else {
         // Search for volunteer in database
         $query = "SELECT id, fullname, email, activities, affiliation, status, created_at, status_updated_at, rejection_reason FROM volunteers WHERE email = ?";
-        $stmt = mysqli_prepare($conn, $query);
-        
-        if ($stmt) {
-            mysqli_stmt_bind_param($stmt, "s", $search_email);
-            mysqli_stmt_execute($stmt);
-            $result = mysqli_stmt_get_result($stmt);
-            $volunteer_data = mysqli_fetch_assoc($result);
-            mysqli_stmt_close($stmt);
+        try {
+            $stmt = $conn->prepare($query);
+            $stmt->execute([$search_email]);
+            $volunteer_data = $stmt->fetch() ?: null;
             
             if (!$volunteer_data) {
                 $error_message = "No application found for this email. Please check your email address or submit an application.";
             }
-        } else {
+        } catch (PDOException $e) {
             $error_message = "Error searching database. Please try again later.";
         }
     }
@@ -489,4 +485,4 @@ function getStatusDescription($status) {
 <?php include 'includes/footer.php'; ?>
 
 </body>
-</html>
+</html>

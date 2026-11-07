@@ -20,35 +20,20 @@ if ($is_logged_in) {
     $user_name = $_SESSION['user_name'] ?? 'User';
 
     $modules_query = "SELECT * FROM modules ORDER BY module_number ASC";
-    $modules_result = mysqli_query($conn, $modules_query);
-    if ($modules_result) {
-        while ($row = mysqli_fetch_assoc($modules_result)) {
-            $available_modules[] = $row;
-        }
-    }
+    $available_modules = $conn->query($modules_query)->fetchAll();
     $total_modules = count($available_modules); 
 
     $progress_query = "SELECT COUNT(DISTINCT module_number) AS completed FROM submissions WHERE user_id = ?";
-    $stmt = mysqli_prepare($conn, $progress_query);
-    if ($stmt) {
-        mysqli_stmt_bind_param($stmt, "i", $user_id);
-        mysqli_stmt_execute($stmt);
-        $progress_result = mysqli_stmt_get_result($stmt);
-        $progress_data = mysqli_fetch_assoc($progress_result);
-        $completed_count = $progress_data['completed'] ?? 0;
-        mysqli_stmt_close($stmt);
-    }
+    $stmt = $conn->prepare($progress_query);
+    $stmt->execute([$user_id]);
+    $progress_data = $stmt->fetch();
+    $completed_count = $progress_data['completed'] ?? 0;
 
     $status_query = "SELECT module_number, file_name FROM submissions WHERE user_id = ?";
-    $stmt2 = mysqli_prepare($conn, $status_query);
-    if ($stmt2) {
-        mysqli_stmt_bind_param($stmt2, "i", $user_id);
-        mysqli_stmt_execute($stmt2);
-        $status_result = mysqli_stmt_get_result($stmt2);
-        while ($row = mysqli_fetch_assoc($status_result)) {
-            $user_submissions[$row['module_number']] = json_decode($row['file_name'], true) ?: [$row['file_name']];
-        }
-        mysqli_stmt_close($stmt2);
+    $stmt2 = $conn->prepare($status_query);
+    $stmt2->execute([$user_id]);
+    while ($row = $stmt2->fetch()) {
+        $user_submissions[$row['module_number']] = json_decode($row['file_name'], true) ?: [$row['file_name']];
     }
 }
 ?>
@@ -179,4 +164,4 @@ if ($is_logged_in) {
 <?php include 'includes/footer.php'; ?>
 
 </body>
-</html>
+</html>

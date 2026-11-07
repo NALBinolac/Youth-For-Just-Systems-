@@ -11,19 +11,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Prepare statement to insert user safely
     $sql = "INSERT INTO users (fullname, email, password) VALUES (?, ?, ?)";
-    $stmt = mysqli_prepare($conn, $sql);
-
-    if ($stmt) {
-        mysqli_stmt_bind_param($stmt, "sss", $fullname, $email, $hashed_password);
-        
-        if (mysqli_stmt_execute($stmt)) {
-            // Successfully registered! Send them straight to the login page
-            header("Location: login.php?registration=success");
-            exit();
-        } else {
-            echo "Error: Email might already be registered.";
-        }
-        mysqli_stmt_close($stmt);
+    try {
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$fullname, $email, $hashed_password]);
+        // Successfully registered! Send them straight to the login page
+        header("Location: login.php?registration=success");
+        exit();
+    } catch (PDOException $e) {
+        echo "Error: Email might already be registered.";
     }
 }
-?>
+?>

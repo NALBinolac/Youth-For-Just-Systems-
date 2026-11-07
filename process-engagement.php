@@ -14,9 +14,10 @@ if($form_type == "member"){
     $sql = "INSERT INTO memberships
     (fullname,email,interest,motivation)
     VALUES
-    ('$fullname','$email','$interest','$motivation')";
+    (?, ?, ?, ?)";
 
-    mysqli_query($conn,$sql);
+    $stmt = $conn->prepare($sql);
+    $stmt->execute([$fullname, $email, $interest, $motivation]);
 
     header("Location: get-involved.php?success=member");
     exit();
@@ -44,14 +45,13 @@ if($form_type == "volunteer"){
    $sql = "INSERT INTO volunteers
 (fullname,email,activities,affiliation)
 VALUES
-('$fullname','$email',
- '$activities',
- '$affiliation')";
+(?, ?, ?, ?)";
 
-    mysqli_query($conn,$sql);
+    $stmt = $conn->prepare($sql);
+    $stmt->execute([$fullname, $email, $activities, $affiliation]);
 
     header("Location: get-involved.php?success=volunteer");
     exit();
 }
 
-?>
+?>

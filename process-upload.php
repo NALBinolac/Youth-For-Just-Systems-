@@ -38,22 +38,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['assignment_files'])) 
         $json_paths = json_encode($saved_file_paths);
 
         $check_query = "SELECT id FROM submissions WHERE user_id = ? AND module_number = ?";
-        $check_stmt = mysqli_prepare($conn, $check_query);
-        mysqli_stmt_bind_param($check_stmt, "ii", $user_id, $module_number);
-        mysqli_stmt_execute($check_stmt);
-        $check_result = mysqli_stmt_get_result($check_stmt);
+        $check_stmt = $conn->prepare($check_query);
+        $check_stmt->execute([$user_id, $module_number]);
         
-        if (mysqli_num_rows($check_result) > 0) {
+        if ($check_stmt->fetch()) {
             $query = "UPDATE submissions SET file_name = ?, file_path = ?, submitted_at = CURRENT_TIMESTAMP WHERE user_id = ? AND module_number = ?";
-            $stmt = mysqli_prepare($conn, $query);
-            mysqli_stmt_bind_param($stmt, "ssii", $json_names, $json_paths, $user_id, $module_number);
+            $params = [$json_names, $json_paths, $user_id, $module_number];
         } else {
             $query = "INSERT INTO submissions (user_id, module_number, file_name, file_path) VALUES (?, ?, ?, ?)";
-            $stmt = mysqli_prepare($conn, $query);
-            mysqli_stmt_bind_param($stmt, "iiss", $user_id, $module_number, $json_names, $json_paths);
+            $params = [$user_id, $module_number, $json_names, $json_paths];
         }
+        $stmt = $conn->prepare($query);
         
-        if (mysqli_stmt_execute($stmt)) {
+        if ($stmt->execute($params)) {
             header("Location: learning.php?upload=success");
             exit();
         } else {
@@ -65,4 +62,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['assignment_files'])) 
 } else {
     die("No files detected.");
 }
-?>
+?>

@@ -8,12 +8,7 @@ $heroData = getSectionContent('homepage_hero', $conn);
 // Fetch only the 3 most recent news articles for the homepage
 $latestNews = [];
 $newsQuery = "SELECT * FROM news_articles ORDER BY article_date DESC, created_at DESC LIMIT 3";
-$newsResult = mysqli_query($conn, $newsQuery);
-if ($newsResult) {
-    while ($row = mysqli_fetch_assoc($newsResult)) {
-        $latestNews[] = $row;
-    }
-}
+$latestNews = $conn->query($newsQuery)->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -457,4 +452,4 @@ if ($newsResult) {
 <?php include 'includes/footer.php'; ?>
 
 </body>
-</html>
+</html>

@@ -1,18 +1,11 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 require_once 'config.php';
-
 $query = "SELECT * FROM events ORDER BY date ASC";
-$stmt = $conn->query($query);
-$events_list = $stmt->fetchAll();
+$events_list = $conn->query($query)->fetchAll();
 ?>
-<!-- Inside HTML: -->
-<?php if (!empty($events_list)): ?>
-    <?php foreach ($events_list as $event): 
-        $eventTimestamp = strtotime($event['date']);
-        $eventDay = date('d', $eventTimestamp);
-        $eventMonth = date('M', $eventTimestamp);
-        // Render event layout...
-    endforeach; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -45,8 +38,8 @@ $events_list = $stmt->fetchAll();
         <div>
             <h2 style="color: #2E7D32; margin-bottom: 25px;">Upcoming Activities</h2>
 
-           <?php if ($result && mysqli_num_rows($result) > 0): ?>
-                <?php while ($event = mysqli_fetch_assoc($result)): 
+           <?php if (!empty($events_list)): ?>
+                <?php foreach ($events_list as $event): 
                     $eventTimestamp = strtotime($event['date']);
                     $eventDay = date('d', $eventTimestamp);
                     $eventMonth = date('M', $eventTimestamp);
@@ -83,7 +76,7 @@ $events_list = $stmt->fetchAll();
                         <a href="get-involved.php" class="btn btn-primary" style="font-size: 0.95rem; font-weight: 600; padding: 12px 25px; border-radius: 30px; white-space: nowrap; background-color: #FDD835; color: #333; box-shadow: none; border: none;">Register</a>
                     </div>
                 </div>
-                <?php endwhile; ?>
+                <?php endforeach; ?>
             <?php else: ?>
                 <div style="background: #f8f9fa; padding: 30px; text-align: center; border-radius: 8px; color: #666;">
                     <p>No upcoming events at the moment. Please check back later!</p>

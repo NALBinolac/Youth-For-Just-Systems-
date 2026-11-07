@@ -10,12 +10,14 @@ $motivation = $_POST['motivation'];
 $sql = "INSERT INTO memberships
 (fullname, email, interest, motivation)
 VALUES
-('$fullname', '$email', '$interest', '$motivation')";
+(?, ?, ?, ?)";
 
-if(mysqli_query($conn, $sql)){
+try {
+    $stmt = $conn->prepare($sql);
+    $stmt->execute([$fullname, $email, $interest, $motivation]);
     echo "Membership Application Submitted!";
-}else{
-    echo "Error: " . mysqli_error($conn);
+} catch (PDOException $e) {
+    echo "Error: could not save your application.";
 }
 
-?>
+?>

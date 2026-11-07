@@ -65,22 +65,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $sql = "INSERT INTO donations (donor_name, email, amount, payment_channel, purpose, proof_path) 
                 VALUES (?, ?, ?, ?, ?, ?)";
         
-        if ($stmt = mysqli_prepare($conn, $sql)) {
-            // I-bind ang mga parameters ("ssdsss" nangangahulugang: string, string, double/decimal, string, string, string)
-            mysqli_stmt_bind_param($stmt, "ssdsss", $donor_name, $email, $amount, $payment_channel, $purpose, $proof_path);
-            
-            if (mysqli_stmt_execute($stmt)) {
-                mysqli_stmt_close($stmt);
-                mysqli_close($conn);
-                
-                header("Location: support.php?success=donation");
-                exit();
-            } else {
-                echo "Error sa pag-execute: " . mysqli_stmt_error($stmt);
-            }
-        } else {
-            echo "Error sa pag-prepare: " . mysqli_error($conn);
+        try {
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([$donor_name, $email, (float) $amount, $payment_channel, $purpose, $proof_path]);
+
+            header("Location: support.php?success=donation");
+            exit();
+        } catch (PDOException $e) {
+            echo "Error sa pag-save ng donasyon. Pakisubukan muli.";
         }
     }
 }
-?>
+?>
