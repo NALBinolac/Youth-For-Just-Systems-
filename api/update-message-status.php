@@ -21,9 +21,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // I-update ang status gamit ang prepared statement para sa seguridad
         $sql = "UPDATE contact_messages SET status = ? WHERE id = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("si", $newStatus, $messageId);
 
-        if ($stmt->execute()) {
+        if ($stmt->execute([$newStatus, $messageId])) {
             echo json_encode([
                 'status' => 'success',
                 'message' => 'Status successfully updated to ' . $newStatus
@@ -31,8 +30,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             throw new Exception("Failed to execute database update.");
         }
-
-        $stmt->close();
 
     } catch (Exception $e) {
         echo json_encode([
@@ -48,5 +45,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ]);
 }
 
-$conn->close();
-?>
+?>

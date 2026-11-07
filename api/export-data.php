@@ -13,10 +13,10 @@ header('Content-Type: application/xml; charset=utf-8');
 if ($export_type === 'events') {
     $xml = new SimpleXMLElement('<?xml version="1.0"?><events></events>');
     $query = "SELECT id, title, date, venue, description, time_range, category FROM events";
-    $result = mysqli_query($conn, $query);
+    $result = $conn->query($query);
     
     if ($result) {
-        while ($row = mysqli_fetch_assoc($result)) {
+        while ($row = $result->fetch()) {
             $event = $xml->addChild('event');
             $event->addAttribute('id', $row['id']);
             $event->addChild('title', htmlspecialchars($row['title']));
@@ -32,10 +32,10 @@ if ($export_type === 'events') {
 } elseif ($export_type === 'modules') {
     $xml = new SimpleXMLElement('<?xml version="1.0"?><modules></modules>');
     $query = "SELECT id, module_number, title, description, type FROM modules";
-    $result = mysqli_query($conn, $query);
+    $result = $conn->query($query);
     
     if ($result) {
-        while ($row = mysqli_fetch_assoc($result)) {
+        while ($row = $result->fetch()) {
             $module = $xml->addChild('module');
             $module->addAttribute('id', $row['id']);
             $module->addChild('module_number', $row['module_number']);
@@ -50,10 +50,10 @@ if ($export_type === 'events') {
     // Default: users
     $xml = new SimpleXMLElement('<?xml version="1.0"?><users></users>');
     $query = "SELECT id, username, fullname, email, role, created_at FROM users";
-    $result = mysqli_query($conn, $query);
+    $result = $conn->query($query);
     
     if ($result) {
-        while ($row = mysqli_fetch_assoc($result)) {
+        while ($row = $result->fetch()) {
             $user = $xml->addChild('user');
             $user->addAttribute('id', $row['id']);
             $user->addChild('username', htmlspecialchars($row['username']));
@@ -67,4 +67,4 @@ if ($export_type === 'events') {
 }
 
 echo $xml->asXML();
-?>
+?>
