@@ -1,11 +1,18 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
 require_once 'config.php';
+
 $query = "SELECT * FROM events ORDER BY date ASC";
-$result = mysqli_query($conn, $query);
+$stmt = $conn->query($query);
+$events_list = $stmt->fetchAll();
 ?>
+<!-- Inside HTML: -->
+<?php if (!empty($events_list)): ?>
+    <?php foreach ($events_list as $event): 
+        $eventTimestamp = strtotime($event['date']);
+        $eventDay = date('d', $eventTimestamp);
+        $eventMonth = date('M', $eventTimestamp);
+        // Render event layout...
+    endforeach; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
